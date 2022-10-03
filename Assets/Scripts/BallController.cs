@@ -18,10 +18,17 @@ public class BallController : MonoBehaviour
 
     private Color solveColor;
 
+    private AudioSource playerAudio;
+    public AudioClip hitSound;
+
+    public ParticleSystem dirtParticle;
+
     private void Start()
     {
         solveColor = Random.ColorHSV(0.5f, 1);
         GetComponent<MeshRenderer>().material.color = solveColor;
+
+        playerAudio = GetComponent<AudioSource>();
     }
 
     private void FixedUpdate()
@@ -50,6 +57,8 @@ public class BallController : MonoBehaviour
                 isTravelling = false;
                 travelDirection = Vector3.zero;
                 nextCollisionPosition = Vector3.zero;
+                playerAudio.PlayOneShot(hitSound, 1.0f);
+                dirtParticle.Stop();
             }
         }
 
@@ -63,8 +72,9 @@ public class BallController : MonoBehaviour
             if (swipePosLastFrame != Vector2.zero)
             {
                 currentSwipe = swipePosCurrentFrame - swipePosLastFrame;
+                var particleShape = dirtParticle.shape;
 
-                if(currentSwipe.sqrMagnitude < minSwipeRecognition)
+                if (currentSwipe.sqrMagnitude < minSwipeRecognition)
                 {
                     return;
                 }
@@ -75,12 +85,14 @@ public class BallController : MonoBehaviour
                 {
                     // Go UP/DOWN
                     SetDestination(currentSwipe.y > 0 ? Vector3.forward : Vector3.back);
+                    dirtParticle.Play();
                 }
 
                 if (currentSwipe.y > -0.5f && currentSwipe.y < 0.5f)
                 {
                     // Go Left/Right
-                    SetDestination(currentSwipe.x > 0 ? Vector3.right : Vector3.left);
+                    SetDestination(currentSwipe.x > 0 ? Vector3.right : Vector3.left);                    
+                    dirtParticle.Play();
                 }
             }
 
